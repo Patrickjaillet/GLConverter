@@ -1,0 +1,19 @@
+{
+  "name": "glconverter-engine",
+  "type": "module",
+  "collaborators": [
+    "Patrick JAILLET <contact.shaderstudio@gmail.com>"
+  ],
+  "version": "0.6.0",
+  "license": "SEE LICENSE IN ../LICENSE",
+  "files": [
+    "glconverter_engine_bg.wasm",
+    "glconverter_engine.js",
+    "glconverter_engine.d.ts"
+  ],
+  "main": "glconverter_engine.js",
+  "types": "glconverter_engine.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
