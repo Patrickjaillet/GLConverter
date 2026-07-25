@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GLConverter</title>
+    <link rel="stylesheet" href="/src/ui/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="background-canvas"></canvas>
+      <div id="content">
+        <header id="header">
+          <div id="brand">
+            <h1>GLConverter</h1>
+            <p id="subtitle">Code golfing and structured code converter</p>
+          </div>
+          <span id="version-badge">v0.3.0</span>
+        </header>
+        <section id="status-bar">
+          <span id="language-badge">Language: —</span>
+          <span id="token-badge">Tokens: —</span>
+          <span id="length-badge">Characters: —</span>
+        </section>
+        <main id="editors">
+          <section class="editor-panel">
+            <div class="editor-panel-header">Original</div>
+            <div id="editor-original" class="editor-mount"></div>
+          </section>
+          <section class="editor-panel">
+            <div class="editor-panel-header">
+              <span>Converted</span>
+              <button id="mode-toggle" class="mode-toggle" type="button">Minified</button>
+            </div>
+            <div id="editor-converted" class="editor-mount"></div>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
