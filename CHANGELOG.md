@@ -5,6 +5,30 @@ All notable changes to GLConverter are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-07-25
+
+### Added
+
+- Advanced loop golfing: counting `for` loops are rewritten as reverse
+  countdown loops when the loop variable is unused in the body and the
+  bound is safe to evaluate once, shortening the loop header.
+- Ternary and conditional golfing: `if`/`else` statements are rewritten
+  as conditional (ternary) expressions for matching `return` statements
+  and matching assignments, and single-branch `if` statements using an
+  expression are rewritten with the `&&` short-circuit shortcut.
+- Native call golfing: known JavaScript golfing shortcuts are applied
+  automatically, including `Boolean(x)` to `!!x`, `indexOf` presence
+  checks to `includes`, `Array.prototype` to `[]`, and `.apply(null, x)`
+  calls to spread syntax.
+- Configurable golfing rules panel: each golfing technique (dead code
+  elimination, declaration merging, loop golfing, ternary golfing,
+  native call golfing, variable renaming, operator simplification) can
+  be toggled on or off independently, with the converted output
+  updating immediately.
+- Character count display for both the original and converted code.
+- Compression score, shown as a percentage of characters saved by the
+  conversion.
+
 ## [0.3.0] - 2026-07-25
 
 ### Added

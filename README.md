@@ -11,10 +11,10 @@ automatically between the two views.
 
 ## Status
 
-Version `0.3.0` — golfing conversion engine (minification, variable
-renaming, operator simplification, declaration merging, dead code
-elimination) with a Minified / Justified output toggle. See
-`CHANGELOG.md` for details.
+Version `0.4.0` — advanced golfing engine (loop golfing, ternary and
+conditional golfing, native call shortcuts) with a configurable rules
+panel, a Minified / Justified output toggle, and a live character
+count / compression score. See `CHANGELOG.md` for details.
 
 ## Development
 

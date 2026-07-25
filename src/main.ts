@@ -1,8 +1,9 @@
 import { BackgroundScene } from "./ui/BackgroundScene";
 import { EditorPane } from "./ui/EditorPane";
-import { ConversionEngine, ConversionMode } from "./core/ConversionEngine";
+import { ConversionEngine, ConversionMode, type ConversionResult } from "./core/ConversionEngine";
 import { detectLanguage } from "./core/LanguageDetector";
 import { parseSource } from "./core/Parser";
+import { defaultGolfRules, golfRuleDescriptors, type GolfRules } from "./core/transform/GolfRules";
 
 const sampleSource = [
   "function greet(name) {",
@@ -25,6 +26,7 @@ class Application {
   private convertedPane: EditorPane | null;
   private isSyncing: boolean;
   private currentMode: ConversionMode;
+  private rules: GolfRules;
 
   constructor() {
     this.conversionEngine = new ConversionEngine();
@@ -32,13 +34,17 @@ class Application {
     this.convertedPane = null;
     this.isSyncing = false;
     this.currentMode = ConversionMode.Minified;
+    this.rules = { ...defaultGolfRules };
   }
 
   public mount(): void {
     this.mountBackground();
     this.mountEditors();
     this.mountModeToggle();
-    this.refreshStatus(sampleSource);
+    this.mountRulesPanel();
+
+    const result = this.conversionEngine.convert(sampleSource, this.currentMode, this.rules);
+    this.refreshStatus(sampleSource, result);
   }
 
   private mountBackground(): void {
@@ -67,9 +73,11 @@ class Application {
       onChange: (content) => this.handleOriginalChange(content)
     });
 
+    const initialResult = this.conversionEngine.convert(sampleSource, this.currentMode, this.rules);
+
     this.convertedPane = new EditorPane({
       parent: convertedMount,
-      initialContent: this.conversionEngine.convert(sampleSource, this.currentMode).code,
+      initialContent: initialResult.code,
       readOnly: true
     });
   }
@@ -85,12 +93,61 @@ class Application {
     toggleButton.addEventListener("click", () => this.handleModeToggle(toggleButton));
   }
 
+  private mountRulesPanel(): void {
+    const toggleButton = document.getElementById("rules-toggle") as HTMLButtonElement | null;
+    const panel = document.getElementById("rules-panel");
+
+    if (toggleButton === null || panel === null) {
+      return;
+    }
+
+    for (const descriptor of golfRuleDescriptors) {
+      const item = document.createElement("label");
+      item.className = "rules-panel-item";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = this.rules[descriptor.key];
+      checkbox.addEventListener("change", () => this.handleRuleChange(descriptor.key, checkbox.checked));
+
+      const text = document.createElement("span");
+      text.textContent = descriptor.label;
+
+      item.appendChild(checkbox);
+      item.appendChild(text);
+      panel.appendChild(item);
+    }
+
+    toggleButton.addEventListener("click", () => {
+      panel.hidden = !panel.hidden;
+    });
+
+    document.addEventListener("click", (event) => {
+      const target = event.target as Node;
+
+      if (!panel.hidden && !panel.contains(target) && target !== toggleButton) {
+        panel.hidden = true;
+      }
+    });
+  }
+
+  private handleRuleChange(key: keyof GolfRules, value: boolean): void {
+    this.rules = { ...this.rules, [key]: value };
+
+    const content = this.originalPane?.getContent() ?? sampleSource;
+    const result = this.renderConverted(content);
+    this.refreshStatus(content, result);
+  }
+
   private handleModeToggle(toggleButton: HTMLButtonElement): void {
     this.currentMode =
       this.currentMode === ConversionMode.Minified ? ConversionMode.Justified : ConversionMode.Minified;
 
     toggleButton.textContent = modeLabels[this.currentMode];
-    this.renderConverted(this.originalPane?.getContent() ?? sampleSource);
+
+    const content = this.originalPane?.getContent() ?? sampleSource;
+    const result = this.renderConverted(content);
+    this.refreshStatus(content, result);
   }
 
   private handleOriginalChange(content: string): void {
@@ -99,18 +156,15 @@ class Application {
     }
 
     this.isSyncing = true;
-    this.renderConverted(content);
-    this.refreshStatus(content);
+    const result = this.renderConverted(content);
+    this.refreshStatus(content, result);
     this.isSyncing = false;
   }
 
-  private renderConverted(content: string): void {
-    if (this.convertedPane === null) {
-      return;
-    }
-
-    const result = this.conversionEngine.convert(content, this.currentMode);
-    this.convertedPane.setContent(result.code);
+  private renderConverted(content: string): ConversionResult {
+    const result = this.conversionEngine.convert(content, this.currentMode, this.rules);
+    this.convertedPane?.setContent(result.code);
+    return result;
   }
 
   public dispose(): void {
@@ -118,13 +172,14 @@ class Application {
     this.convertedPane?.destroy();
   }
 
-  private refreshStatus(content: string): void {
+  private refreshStatus(content: string, result: ConversionResult): void {
     const language = detectLanguage(content);
     const parseResult = parseSource(content);
 
     const languageBadge = document.getElementById("language-badge");
     const tokenBadge = document.getElementById("token-badge");
     const lengthBadge = document.getElementById("length-badge");
+    const compressionBadge = document.getElementById("compression-badge");
 
     if (languageBadge !== null) {
       languageBadge.textContent = `Language: ${language}`;
@@ -136,7 +191,12 @@ class Application {
     }
 
     if (lengthBadge !== null) {
-      lengthBadge.textContent = `Characters: ${content.length}`;
+      lengthBadge.textContent = `Characters: ${result.originalLength} \u2192 ${result.convertedLength}`;
+    }
+
+    if (compressionBadge !== null) {
+      const ratio = result.errorMessage !== null ? 0 : result.compressionRatio;
+      compressionBadge.textContent = `Compression: ${ratio.toFixed(1)}%`;
     }
   }
 }

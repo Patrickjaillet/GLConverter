@@ -13,7 +13,8 @@ function compactWhitespace(code: string): string {
     .replace(/\bfor\s*\(/g, "for(")
     .replace(/\bwhile\s*\(/g, "while(")
     .replace(/\bswitch\s*\(/g, "switch(")
-    .replace(/\bcatch\s*\(/g, "catch(");
+    .replace(/\bcatch\s*\(/g, "catch(")
+    .replace(/;\s*\)/g, ";)");
 
   let previous: string;
 

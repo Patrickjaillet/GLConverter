@@ -15,12 +15,13 @@
             <h1>GLConverter</h1>
             <p id="subtitle">Code golfing and structured code converter</p>
           </div>
-          <span id="version-badge">v0.3.0</span>
+          <span id="version-badge">v0.4.0</span>
         </header>
         <section id="status-bar">
           <span id="language-badge">Language: —</span>
           <span id="token-badge">Tokens: —</span>
           <span id="length-badge">Characters: —</span>
+          <span id="compression-badge">Compression: —</span>
         </section>
         <main id="editors">
           <section class="editor-panel">
@@ -30,7 +31,13 @@
           <section class="editor-panel">
             <div class="editor-panel-header">
               <span>Converted</span>
-              <button id="mode-toggle" class="mode-toggle" type="button">Minified</button>
+              <div class="header-actions">
+                <div class="rules-widget">
+                  <button id="rules-toggle" class="mode-toggle" type="button">Rules</button>
+                  <div id="rules-panel" class="rules-panel" hidden></div>
+                </div>
+                <button id="mode-toggle" class="mode-toggle" type="button">Minified</button>
+              </div>
             </div>
             <div id="editor-converted" class="editor-mount"></div>
           </section>
