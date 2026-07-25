@@ -12,6 +12,8 @@ import { parseSource } from "./core/Parser";
 import { defaultGolfRules, golfRuleDescriptors, type GolfRules } from "./core/transform/GolfRules";
 import { engineManager, ActiveEngine } from "./core/EngineManager";
 import { runBenchmark, type BenchmarkReport } from "./core/Benchmark";
+import { HistoryStore, type HistoryEntry } from "./core/HistoryStore";
+import { readFileAsText, downloadTextFile, copyToClipboard } from "./ui/FileTransfer";
 
 const sampleSource = [
   "function greet(name) {",
@@ -52,6 +54,8 @@ class Application {
   private currentMode: ConversionMode;
   private currentDirection: ConversionDirection;
   private rules: GolfRules;
+  private readonly historyStore: HistoryStore;
+  private historyDebounceTimer: number | undefined;
 
   constructor() {
     this.conversionEngine = new ConversionEngine();
@@ -61,6 +65,8 @@ class Application {
     this.currentMode = ConversionMode.Minified;
     this.currentDirection = ConversionDirection.Golf;
     this.rules = { ...defaultGolfRules };
+    this.historyStore = new HistoryStore();
+    this.historyDebounceTimer = undefined;
   }
 
   public async mount(): Promise<void> {
@@ -72,6 +78,10 @@ class Application {
     this.mountDirectionToggle();
     this.mountRulesPanel();
     this.mountBenchmarkPanel();
+    this.mountHistoryPanel();
+    this.mountEditingControls();
+    this.mountImportControls();
+    this.mountExportAndCopyControls();
     this.updateDirectionVisibility();
 
     const result = this.conversionEngine.convert(sampleSource, this.currentMode, this.rules, this.currentDirection);
@@ -330,6 +340,212 @@ class Application {
     return row;
   }
 
+  private mountEditingControls(): void {
+    const undoButton = document.getElementById("undo-toggle") as HTMLButtonElement | null;
+    const redoButton = document.getElementById("redo-toggle") as HTMLButtonElement | null;
+
+    undoButton?.addEventListener("click", () => this.originalPane?.undo());
+    redoButton?.addEventListener("click", () => this.originalPane?.redo());
+  }
+
+  private mountImportControls(): void {
+    const importButton = document.getElementById("import-toggle") as HTMLButtonElement | null;
+    const importInput = document.getElementById("import-input") as HTMLInputElement | null;
+    const dropzone = document.getElementById("editor-original");
+
+    if (importButton !== null && importInput !== null) {
+      importButton.addEventListener("click", () => importInput.click());
+
+      importInput.addEventListener("change", () => {
+        const file = importInput.files?.[0];
+
+        if (file !== undefined) {
+          void this.importFile(file);
+        }
+
+        importInput.value = "";
+      });
+    }
+
+    if (dropzone === null) {
+      return;
+    }
+
+    dropzone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      dropzone.classList.add("editor-mount-dragover");
+    });
+
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.classList.remove("editor-mount-dragover");
+    });
+
+    dropzone.addEventListener("drop", (event) => {
+      event.preventDefault();
+      dropzone.classList.remove("editor-mount-dragover");
+
+      const file = event.dataTransfer?.files?.[0];
+
+      if (file !== undefined) {
+        void this.importFile(file);
+      }
+    });
+  }
+
+  private async importFile(file: File): Promise<void> {
+    const content = await readFileAsText(file);
+    this.originalPane?.setContent(content);
+  }
+
+  private mountExportAndCopyControls(): void {
+    const copyButton = document.getElementById("copy-toggle") as HTMLButtonElement | null;
+    const exportToggle = document.getElementById("export-toggle") as HTMLButtonElement | null;
+    const exportPanel = document.getElementById("export-panel");
+    const exportJsButton = document.getElementById("export-js") as HTMLButtonElement | null;
+    const exportTxtButton = document.getElementById("export-txt") as HTMLButtonElement | null;
+
+    copyButton?.addEventListener("click", () => {
+      const content = this.convertedPane?.getContent() ?? "";
+
+      void copyToClipboard(content).then((success) => {
+        if (copyButton === null) {
+          return;
+        }
+
+        copyButton.textContent = success ? "Copied" : "Failed";
+        window.setTimeout(() => {
+          copyButton.textContent = "Copy";
+        }, 1500);
+      });
+    });
+
+    if (exportToggle === null || exportPanel === null) {
+      return;
+    }
+
+    exportToggle.addEventListener("click", () => {
+      exportPanel.hidden = !exportPanel.hidden;
+    });
+
+    exportJsButton?.addEventListener("click", () => {
+      const content = this.convertedPane?.getContent() ?? "";
+      downloadTextFile("glconverter-output.js", content, "text/javascript");
+      exportPanel.hidden = true;
+    });
+
+    exportTxtButton?.addEventListener("click", () => {
+      const content = this.convertedPane?.getContent() ?? "";
+      downloadTextFile("glconverter-output.txt", content, "text/plain");
+      exportPanel.hidden = true;
+    });
+
+    document.addEventListener("click", (event) => {
+      const target = event.target as Node;
+
+      if (!exportPanel.hidden && !exportPanel.contains(target) && target !== exportToggle) {
+        exportPanel.hidden = true;
+      }
+    });
+  }
+
+  private mountHistoryPanel(): void {
+    const toggleButton = document.getElementById("history-toggle") as HTMLButtonElement | null;
+    const panel = document.getElementById("history-panel");
+
+    if (toggleButton === null || panel === null) {
+      return;
+    }
+
+    toggleButton.addEventListener("click", () => {
+      panel.hidden = !panel.hidden;
+
+      if (!panel.hidden) {
+        this.renderHistory(panel);
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      const target = event.target as Node;
+
+      if (!panel.hidden && !panel.contains(target) && target !== toggleButton) {
+        panel.hidden = true;
+      }
+    });
+  }
+
+  private renderHistory(panel: HTMLElement): void {
+    panel.innerHTML = "";
+
+    const entries = this.historyStore.getAll();
+
+    if (entries.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "history-panel-empty";
+      empty.textContent = "No conversion recorded yet in this session.";
+      panel.appendChild(empty);
+      return;
+    }
+
+    for (const entry of entries) {
+      panel.appendChild(this.buildHistoryEntryElement(entry, panel));
+    }
+  }
+
+  private buildHistoryEntryElement(entry: HistoryEntry, panel: HTMLElement): HTMLElement {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "history-entry";
+
+    const meta = document.createElement("div");
+    meta.className = "history-entry-meta";
+    const time = new Date(entry.timestamp).toLocaleTimeString();
+    meta.textContent = `${time} \u2014 ${directionLabels[entry.direction]} \u2014 ${entry.compressionRatio.toFixed(1)}%`;
+
+    const preview = document.createElement("div");
+    preview.className = "history-entry-preview";
+    preview.textContent = entry.originalContent.replace(/\s+/g, " ").trim().slice(0, 80);
+
+    item.appendChild(meta);
+    item.appendChild(preview);
+
+    item.addEventListener("click", () => {
+      this.currentDirection = entry.direction;
+      this.currentMode = entry.mode;
+
+      const directionToggle = document.getElementById("direction-toggle") as HTMLButtonElement | null;
+
+      if (directionToggle !== null) {
+        directionToggle.textContent = directionLabels[this.currentDirection];
+      }
+
+      const modeToggle = document.getElementById("mode-toggle") as HTMLButtonElement | null;
+
+      if (modeToggle !== null) {
+        modeToggle.textContent = modeLabels[this.currentMode];
+      }
+
+      this.updateDirectionVisibility();
+      this.originalPane?.setContent(entry.originalContent);
+      panel.hidden = true;
+    });
+
+    return item;
+  }
+
+  private recordHistory(content: string, result: ConversionResult): void {
+    if (content.trim().length === 0 || result.errorMessage !== null) {
+      return;
+    }
+
+    this.historyStore.add({
+      direction: result.direction,
+      mode: result.mode,
+      originalContent: content,
+      convertedContent: result.code,
+      compressionRatio: result.compressionRatio
+    });
+  }
+
   private handleModeToggle(toggleButton: HTMLButtonElement): void {
     this.currentMode =
       this.currentMode === ConversionMode.Minified ? ConversionMode.Justified : ConversionMode.Minified;
@@ -350,6 +566,11 @@ class Application {
     const result = this.renderConverted(content);
     this.refreshStatus(content, result);
     this.isSyncing = false;
+
+    window.clearTimeout(this.historyDebounceTimer);
+    this.historyDebounceTimer = window.setTimeout(() => {
+      this.recordHistory(content, result);
+    }, 800);
   }
 
   private renderConverted(content: string): ConversionResult {

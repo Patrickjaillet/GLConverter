@@ -5,6 +5,25 @@ All notable changes to GLConverter are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-07-25
+
+### Added
+
+- Local file import: drag and drop a `.js` or `.txt` file onto the
+  original editor panel, or use the new "Import" button to pick a file,
+  to load its content for conversion.
+- Export of the converted code as a downloadable `.js` or `.txt` file
+  from the new "Export" menu in the converted panel.
+- One-click "Copy" button to copy the converted code to the clipboard,
+  with transient confirmation feedback.
+- Session-local conversion history: every distinct edit to the original
+  code is recorded (debounced) with its timestamp, direction, and
+  compression ratio, browsable from the new "History" panel and
+  restorable with a single click. The history is kept in memory only
+  and is cleared on page reload.
+- Undo / Redo controls for the original editor, exposed both as header
+  buttons and through the existing keyboard shortcuts.
+
 ## [0.6.0] - 2026-07-25
 
 ### Added

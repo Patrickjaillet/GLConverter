@@ -17,12 +17,16 @@
           </div>
           <div id="header-controls">
             <button id="direction-toggle" class="mode-toggle" type="button">Golf</button>
+            <div class="history-widget">
+              <button id="history-toggle" class="mode-toggle" type="button">History</button>
+              <div id="history-panel" class="history-panel" hidden></div>
+            </div>
             <div class="benchmark-widget">
               <button id="benchmark-toggle" class="mode-toggle" type="button">Benchmark</button>
               <div id="benchmark-panel" class="benchmark-panel" hidden></div>
             </div>
             <span id="engine-badge">Engine: —</span>
-            <span id="version-badge">v0.6.0</span>
+            <span id="version-badge">v0.7.0</span>
           </div>
         </header>
         <section id="status-bar">
@@ -34,13 +38,29 @@
         </section>
         <main id="editors">
           <section class="editor-panel">
-            <div class="editor-panel-header">Original</div>
+            <div class="editor-panel-header">
+              <span>Original</span>
+              <div class="header-actions">
+                <button id="undo-toggle" class="mode-toggle" type="button">Undo</button>
+                <button id="redo-toggle" class="mode-toggle" type="button">Redo</button>
+                <button id="import-toggle" class="mode-toggle" type="button">Import</button>
+                <input id="import-input" class="visually-hidden" type="file" accept=".js,.txt,text/javascript,text/plain" />
+              </div>
+            </div>
             <div id="editor-original" class="editor-mount"></div>
           </section>
           <section class="editor-panel">
             <div class="editor-panel-header">
               <span>Converted</span>
               <div class="header-actions">
+                <button id="copy-toggle" class="mode-toggle" type="button">Copy</button>
+                <div class="export-widget">
+                  <button id="export-toggle" class="mode-toggle" type="button">Export</button>
+                  <div id="export-panel" class="export-panel" hidden>
+                    <button id="export-js" class="export-panel-item" type="button">.js file</button>
+                    <button id="export-txt" class="export-panel-item" type="button">.txt file</button>
+                  </div>
+                </div>
                 <div class="rules-widget">
                   <button id="rules-toggle" class="mode-toggle" type="button">Rules</button>
                   <div id="rules-panel" class="rules-panel" hidden></div>

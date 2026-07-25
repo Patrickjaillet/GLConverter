@@ -1,6 +1,6 @@
 import { EditorState, type Extension } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, undo, redo } from "@codemirror/commands";
 import { javascript } from "@codemirror/lang-javascript";
 import { syntaxHighlighting, HighlightStyle } from "@codemirror/language";
 import { tags } from "@lezer/highlight";
@@ -99,6 +99,16 @@ export class EditorPane {
     this.view.dispatch({
       changes: { from: 0, to: this.view.state.doc.length, insert: content }
     });
+  }
+
+  public undo(): void {
+    undo(this.view);
+    this.view.focus();
+  }
+
+  public redo(): void {
+    redo(this.view);
+    this.view.focus();
   }
 
   public destroy(): void {

@@ -11,13 +11,10 @@ automatically between the two views.
 
 ## Status
 
-Version `0.6.0` — a Rust engine compiled to WebAssembly now powers the
-high-performance parts of the conversion pipeline. The application loads
-the WASM engine on startup and transparently falls back to the pure
-JavaScript engine when it is unavailable, with identical output either
-way. The active engine is shown in the header, and a "Benchmark" panel
-compares JS and WASM performance on the current source. See
-`CHANGELOG.md` for details.
+Version `0.7.0` — local file import (drag & drop or file picker),
+export of the converted code as `.js` or `.txt`, one-click clipboard
+copy, a session-local conversion history panel, and Undo / Redo
+controls for the original editor. See `CHANGELOG.md` for details.
 
 ## Development
 
