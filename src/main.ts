@@ -1,6 +1,12 @@
 import { BackgroundScene } from "./ui/BackgroundScene";
 import { EditorPane } from "./ui/EditorPane";
-import { ConversionEngine, ConversionMode, type ConversionResult } from "./core/ConversionEngine";
+import {
+  ConversionEngine,
+  ConversionMode,
+  ConversionDirection,
+  EquivalenceStatus,
+  type ConversionResult
+} from "./core/ConversionEngine";
 import { detectLanguage } from "./core/LanguageDetector";
 import { parseSource } from "./core/Parser";
 import { defaultGolfRules, golfRuleDescriptors, type GolfRules } from "./core/transform/GolfRules";
@@ -20,12 +26,24 @@ const modeLabels: Record<ConversionMode, string> = {
   [ConversionMode.Justified]: "Justified"
 };
 
+const directionLabels: Record<ConversionDirection, string> = {
+  [ConversionDirection.Golf]: "Golf",
+  [ConversionDirection.Degolf]: "De-golf"
+};
+
+const equivalenceLabels: Record<EquivalenceStatus, string> = {
+  [EquivalenceStatus.Verified]: "Equivalence: Verified",
+  [EquivalenceStatus.Uncertain]: "Equivalence: Uncertain",
+  [EquivalenceStatus.NotChecked]: "Equivalence: \u2014"
+};
+
 class Application {
   private readonly conversionEngine: ConversionEngine;
   private originalPane: EditorPane | null;
   private convertedPane: EditorPane | null;
   private isSyncing: boolean;
   private currentMode: ConversionMode;
+  private currentDirection: ConversionDirection;
   private rules: GolfRules;
 
   constructor() {
@@ -34,6 +52,7 @@ class Application {
     this.convertedPane = null;
     this.isSyncing = false;
     this.currentMode = ConversionMode.Minified;
+    this.currentDirection = ConversionDirection.Golf;
     this.rules = { ...defaultGolfRules };
   }
 
@@ -41,9 +60,11 @@ class Application {
     this.mountBackground();
     this.mountEditors();
     this.mountModeToggle();
+    this.mountDirectionToggle();
     this.mountRulesPanel();
+    this.updateDirectionVisibility();
 
-    const result = this.conversionEngine.convert(sampleSource, this.currentMode, this.rules);
+    const result = this.conversionEngine.convert(sampleSource, this.currentMode, this.rules, this.currentDirection);
     this.refreshStatus(sampleSource, result);
   }
 
@@ -73,7 +94,12 @@ class Application {
       onChange: (content) => this.handleOriginalChange(content)
     });
 
-    const initialResult = this.conversionEngine.convert(sampleSource, this.currentMode, this.rules);
+    const initialResult = this.conversionEngine.convert(
+      sampleSource,
+      this.currentMode,
+      this.rules,
+      this.currentDirection
+    );
 
     this.convertedPane = new EditorPane({
       parent: convertedMount,
@@ -91,6 +117,48 @@ class Application {
 
     toggleButton.textContent = modeLabels[this.currentMode];
     toggleButton.addEventListener("click", () => this.handleModeToggle(toggleButton));
+  }
+
+  private mountDirectionToggle(): void {
+    const toggleButton = document.getElementById("direction-toggle") as HTMLButtonElement | null;
+
+    if (toggleButton === null) {
+      return;
+    }
+
+    toggleButton.textContent = directionLabels[this.currentDirection];
+    toggleButton.addEventListener("click", () => this.handleDirectionToggle(toggleButton));
+  }
+
+  private updateDirectionVisibility(): void {
+    const modeToggle = document.getElementById("mode-toggle") as HTMLButtonElement | null;
+    const rulesWidget = document.querySelector(".rules-widget") as HTMLElement | null;
+    const equivalenceBadge = document.getElementById("equivalence-badge");
+    const isDegolf = this.currentDirection === ConversionDirection.Degolf;
+
+    if (modeToggle !== null) {
+      modeToggle.hidden = isDegolf;
+    }
+
+    if (rulesWidget !== null) {
+      rulesWidget.hidden = isDegolf;
+    }
+
+    if (equivalenceBadge !== null) {
+      equivalenceBadge.hidden = !isDegolf;
+    }
+  }
+
+  private handleDirectionToggle(toggleButton: HTMLButtonElement): void {
+    this.currentDirection =
+      this.currentDirection === ConversionDirection.Golf ? ConversionDirection.Degolf : ConversionDirection.Golf;
+
+    toggleButton.textContent = directionLabels[this.currentDirection];
+    this.updateDirectionVisibility();
+
+    const content = this.originalPane?.getContent() ?? sampleSource;
+    const result = this.renderConverted(content);
+    this.refreshStatus(content, result);
   }
 
   private mountRulesPanel(): void {
@@ -162,7 +230,7 @@ class Application {
   }
 
   private renderConverted(content: string): ConversionResult {
-    const result = this.conversionEngine.convert(content, this.currentMode, this.rules);
+    const result = this.conversionEngine.convert(content, this.currentMode, this.rules, this.currentDirection);
     this.convertedPane?.setContent(result.code);
     return result;
   }
@@ -180,6 +248,7 @@ class Application {
     const tokenBadge = document.getElementById("token-badge");
     const lengthBadge = document.getElementById("length-badge");
     const compressionBadge = document.getElementById("compression-badge");
+    const equivalenceBadge = document.getElementById("equivalence-badge");
 
     if (languageBadge !== null) {
       languageBadge.textContent = `Language: ${language}`;
@@ -197,6 +266,10 @@ class Application {
     if (compressionBadge !== null) {
       const ratio = result.errorMessage !== null ? 0 : result.compressionRatio;
       compressionBadge.textContent = `Compression: ${ratio.toFixed(1)}%`;
+    }
+
+    if (equivalenceBadge !== null) {
+      equivalenceBadge.textContent = equivalenceLabels[result.equivalence];
     }
   }
 }

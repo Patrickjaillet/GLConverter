@@ -1,12 +1,12 @@
 import * as eslintScope from "eslint-scope";
 import type { Program } from "acorn";
-import { forEachNode, type AstNode } from "./AstTraversal";
+import type { AstNode } from "./AstTraversal";
 import { reservedWords } from "./ReservedWords";
 import { fixShorthandProperties } from "./ShorthandFixer";
 
 const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
-function nextShortName(startIndex: number, takenNames: Set<string>): { name: string; nextIndex: number } {
+function nextShortName(startIndex: number, blocked: Set<string>): { name: string; nextIndex: number } {
   let index = startIndex;
 
   while (true) {
@@ -20,25 +20,23 @@ function nextShortName(startIndex: number, takenNames: Set<string>): { name: str
 
     index++;
 
-    if (!reservedWords.has(name) && !takenNames.has(name)) {
+    if (!reservedWords.has(name) && !blocked.has(name)) {
       return { name, nextIndex: index };
     }
   }
 }
 
-function collectExistingNames(ast: AstNode): Set<string> {
+function collectFreeNames(scope: eslintScope.Scope): Set<string> {
   const names = new Set<string>();
 
-  forEachNode(ast, (node) => {
-    if (node.type === "Identifier" && typeof node.name === "string") {
-      names.add(node.name as string);
-    }
-  });
+  for (const reference of scope.through) {
+    names.add(reference.identifier.name);
+  }
 
   return names;
 }
 
-export function renameVariables(ast: Program): void {
+export function applyCanonicalRenaming(ast: Program): void {
   const manager = eslintScope.analyze(ast as unknown as Parameters<typeof eslintScope.analyze>[0], {
     ecmaVersion: 2022,
     sourceType: ast.sourceType === "module" ? "module" : "script",
@@ -50,7 +48,7 @@ export function renameVariables(ast: Program): void {
     return;
   }
 
-  const takenNames = collectExistingNames(ast as unknown as AstNode);
+  const blocked = collectFreeNames(manager.globalScope);
   let nameIndex = 0;
 
   const visitScope = (scope: eslintScope.Scope): void => {
@@ -65,9 +63,8 @@ export function renameVariables(ast: Program): void {
         continue;
       }
 
-      const generated = nextShortName(nameIndex, takenNames);
+      const generated = nextShortName(nameIndex, blocked);
       nameIndex = generated.nextIndex;
-      takenNames.add(generated.name);
 
       for (const identifier of variable.identifiers) {
         (identifier as unknown as AstNode).name = generated.name;

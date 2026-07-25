@@ -73,6 +73,12 @@ body {
   font-weight: 500;
 }
 
+#header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 #version-badge {
   font-family: var(--font-display);
   font-size: 0.8rem;

@@ -5,6 +5,30 @@ All notable changes to GLConverter are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-07-25
+
+### Added
+
+- Reverse conversion (de-golfing): golfed code can now be converted back
+  into structured, readable code.
+- Restoration of readable variable names: identifiers are renamed
+  according to their role (function names, parameters, loop counters,
+  general values) instead of the original single-letter golfed names.
+- Restoration of indentation and block structure: single-statement
+  bodies are re-wrapped in blocks and the result is reformatted with
+  clean indentation.
+- Heuristic reconstruction of common golfed patterns: ternary and
+  `&&`-shortcut conditionals are expanded back into `if`/`else`
+  statements, countdown `for` loops are expanded back into ascending
+  loops, and double-negation / falsy-literal boolean shortcuts are
+  expanded back into their explicit form.
+- Functional equivalence validation: after de-golfing, the reconstructed
+  code is re-golfed and compared against a canonical signature of the
+  original input to confirm the conversion is behavior-preserving, shown
+  as an "Equivalence" status badge.
+- Direction toggle in the interface to switch between "Golf" (structured
+  to golfed) and "De-golf" (golfed to structured) conversion.
+
 ## [0.4.0] - 2026-07-25
 
 ### Added

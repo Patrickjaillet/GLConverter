@@ -11,10 +11,11 @@ automatically between the two views.
 
 ## Status
 
-Version `0.4.0` — advanced golfing engine (loop golfing, ternary and
-conditional golfing, native call shortcuts) with a configurable rules
-panel, a Minified / Justified output toggle, and a live character
-count / compression score. See `CHANGELOG.md` for details.
+Version `0.5.0` — reverse conversion (de-golfing): golfed code can be
+converted back into structured, readable code with restored variable
+names, indentation, and block structure, plus a heuristic functional
+equivalence check. Use the "Golf" / "De-golf" toggle to switch
+conversion direction. See `CHANGELOG.md` for details.
 
 ## Development
 
