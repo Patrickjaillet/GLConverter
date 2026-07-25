@@ -1,6 +1,6 @@
 [package]
 name = "glconverter-engine"
-version = "0.1.0"
+version = "0.6.0"
 edition = "2021"
 authors = ["Patrick JAILLET <contact.shaderstudio@gmail.com>"]
 license-file = "../LICENSE"
@@ -14,3 +14,4 @@ wasm-bindgen = "0.2"
 [profile.release]
 opt-level = "z"
 lto = true
+panic = "abort"

@@ -6,6 +6,7 @@ import { applyDegolfTransforms } from "./transform/DegolfPipeline";
 import { generateMinified, generateJustified } from "./CodeGenerator";
 import { defaultGolfRules, type GolfRules } from "./transform/GolfRules";
 import { checkEquivalence, EquivalenceStatus } from "./EquivalenceValidator";
+import { engineManager } from "./EngineManager";
 
 export enum ConversionMode {
   Minified = "minified",
@@ -75,7 +76,10 @@ export class ConversionEngine {
 
       applyGolfTransforms(ast, rules);
 
-      const code = mode === ConversionMode.Minified ? generateMinified(ast) : generateJustified(ast);
+      const code =
+        mode === ConversionMode.Minified
+          ? generateMinified(ast, (raw) => engineManager.compactWhitespace(raw))
+          : generateJustified(ast);
       const compressionRatio = source.length === 0 ? 0 : (1 - code.length / source.length) * 100;
 
       return {

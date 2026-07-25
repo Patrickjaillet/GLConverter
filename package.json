@@ -1,6 +1,6 @@
 {
   "name": "glconverter",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "description": "Code golfing to structured code converter, and vice versa",
@@ -8,7 +8,8 @@
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:wasm": "node scripts/build-wasm.mjs",
+    "build": "npm run build:wasm && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

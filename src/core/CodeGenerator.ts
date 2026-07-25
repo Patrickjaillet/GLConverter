@@ -1,7 +1,7 @@
 import { generate } from "astring";
 import type { Program } from "acorn";
 
-function compactWhitespace(code: string): string {
+export function compactWhitespace(code: string): string {
   let output = code
     .replace(/}\s*else\s*{/g, "}else{")
     .replace(/}\s*else\s*if\s*\(/g, "}else if(")
@@ -26,9 +26,9 @@ function compactWhitespace(code: string): string {
   return output.trim();
 }
 
-export function generateMinified(ast: Program): string {
+export function generateMinified(ast: Program, compact: (code: string) => string = compactWhitespace): string {
   const raw = generate(ast, { indent: "", lineEnd: "" });
-  return compactWhitespace(raw);
+  return compact(raw);
 }
 
 export function generateJustified(ast: Program): string {

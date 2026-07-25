@@ -10,6 +10,8 @@ import {
 import { detectLanguage } from "./core/LanguageDetector";
 import { parseSource } from "./core/Parser";
 import { defaultGolfRules, golfRuleDescriptors, type GolfRules } from "./core/transform/GolfRules";
+import { engineManager, ActiveEngine } from "./core/EngineManager";
+import { runBenchmark, type BenchmarkReport } from "./core/Benchmark";
 
 const sampleSource = [
   "function greet(name) {",
@@ -37,6 +39,11 @@ const equivalenceLabels: Record<EquivalenceStatus, string> = {
   [EquivalenceStatus.NotChecked]: "Equivalence: \u2014"
 };
 
+const engineLabels: Record<ActiveEngine, string> = {
+  [ActiveEngine.Wasm]: "Engine: WASM",
+  [ActiveEngine.Js]: "Engine: JS (fallback)"
+};
+
 class Application {
   private readonly conversionEngine: ConversionEngine;
   private originalPane: EditorPane | null;
@@ -56,16 +63,27 @@ class Application {
     this.rules = { ...defaultGolfRules };
   }
 
-  public mount(): void {
+  public async mount(): Promise<void> {
     this.mountBackground();
+    await engineManager.initialize();
+    this.updateEngineBadge();
     this.mountEditors();
     this.mountModeToggle();
     this.mountDirectionToggle();
     this.mountRulesPanel();
+    this.mountBenchmarkPanel();
     this.updateDirectionVisibility();
 
     const result = this.conversionEngine.convert(sampleSource, this.currentMode, this.rules, this.currentDirection);
     this.refreshStatus(sampleSource, result);
+  }
+
+  private updateEngineBadge(): void {
+    const engineBadge = document.getElementById("engine-badge");
+
+    if (engineBadge !== null) {
+      engineBadge.textContent = engineLabels[engineManager.getActiveEngine()];
+    }
   }
 
   private mountBackground(): void {
@@ -207,6 +225,111 @@ class Application {
     this.refreshStatus(content, result);
   }
 
+  private mountBenchmarkPanel(): void {
+    const toggleButton = document.getElementById("benchmark-toggle") as HTMLButtonElement | null;
+    const panel = document.getElementById("benchmark-panel");
+
+    if (toggleButton === null || panel === null) {
+      return;
+    }
+
+    toggleButton.addEventListener("click", () => {
+      panel.hidden = !panel.hidden;
+
+      if (!panel.hidden) {
+        this.renderBenchmark(panel);
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      const target = event.target as Node;
+
+      if (!panel.hidden && !panel.contains(target) && target !== toggleButton) {
+        panel.hidden = true;
+      }
+    });
+  }
+
+  private renderBenchmark(panel: HTMLElement): void {
+    panel.innerHTML = "";
+
+    const title = document.createElement("div");
+    title.className = "benchmark-panel-title";
+    title.textContent = "Engine benchmark";
+    panel.appendChild(title);
+
+    const status = document.createElement("div");
+    status.className = "benchmark-panel-status";
+    status.textContent = "Running...";
+    panel.appendChild(status);
+
+    const content = this.originalPane?.getContent() ?? sampleSource;
+    const report = runBenchmark(content);
+
+    status.textContent = report.wasmAvailable
+      ? `Active engine: WASM \u2014 ${report.iterations} iterations`
+      : `Active engine: JS fallback (WASM not built) \u2014 ${report.iterations} iterations`;
+
+    for (const task of report.tasks) {
+      panel.appendChild(this.buildBenchmarkTaskElement(task));
+    }
+  }
+
+  private buildBenchmarkTaskElement(task: BenchmarkReport["tasks"][number]): HTMLElement {
+    const container = document.createElement("div");
+    container.className = "benchmark-task";
+
+    const label = document.createElement("div");
+    label.className = "benchmark-task-label";
+    label.textContent = task.label;
+    container.appendChild(label);
+
+    const maxDuration = Math.max(task.jsDurationMs, task.wasmDurationMs ?? 0, 0.001);
+
+    container.appendChild(this.buildBenchmarkBarRow("JS", task.jsDurationMs, maxDuration));
+
+    if (task.wasmDurationMs !== null) {
+      container.appendChild(this.buildBenchmarkBarRow("WASM", task.wasmDurationMs, maxDuration));
+    }
+
+    if (task.speedup !== null) {
+      const speedup = document.createElement("div");
+      speedup.className = "benchmark-speedup";
+      speedup.textContent = `WASM is ${task.speedup.toFixed(2)}x the JS speed`;
+      container.appendChild(speedup);
+    }
+
+    return container;
+  }
+
+  private buildBenchmarkBarRow(name: string, durationMs: number, maxDuration: number): HTMLElement {
+    const row = document.createElement("div");
+    row.className = "benchmark-bar-row";
+
+    const label = document.createElement("span");
+    label.className = "benchmark-bar-name";
+    label.textContent = name;
+
+    const track = document.createElement("div");
+    track.className = "benchmark-bar-track";
+
+    const fill = document.createElement("div");
+    fill.className = "benchmark-bar-fill";
+    const ratio = maxDuration === 0 ? 0 : Math.min(100, (durationMs / maxDuration) * 100);
+    fill.style.width = `${ratio}%`;
+    track.appendChild(fill);
+
+    const value = document.createElement("span");
+    value.className = "benchmark-bar-value";
+    value.textContent = `${durationMs.toFixed(2)} ms`;
+
+    row.appendChild(label);
+    row.appendChild(track);
+    row.appendChild(value);
+
+    return row;
+  }
+
   private handleModeToggle(toggleButton: HTMLButtonElement): void {
     this.currentMode =
       this.currentMode === ConversionMode.Minified ? ConversionMode.Justified : ConversionMode.Minified;
@@ -276,7 +399,7 @@ class Application {
 
 function bootstrap(): void {
   const app = new Application();
-  app.mount();
+  void app.mount();
 }
 
 document.addEventListener("DOMContentLoaded", bootstrap);

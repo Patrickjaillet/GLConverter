@@ -11,11 +11,13 @@ automatically between the two views.
 
 ## Status
 
-Version `0.5.0` — reverse conversion (de-golfing): golfed code can be
-converted back into structured, readable code with restored variable
-names, indentation, and block structure, plus a heuristic functional
-equivalence check. Use the "Golf" / "De-golf" toggle to switch
-conversion direction. See `CHANGELOG.md` for details.
+Version `0.6.0` — a Rust engine compiled to WebAssembly now powers the
+high-performance parts of the conversion pipeline. The application loads
+the WASM engine on startup and transparently falls back to the pure
+JavaScript engine when it is unavailable, with identical output either
+way. The active engine is shown in the header, and a "Benchmark" panel
+compares JS and WASM performance on the current source. See
+`CHANGELOG.md` for details.
 
 ## Development
 
@@ -30,8 +32,29 @@ npm run dev
 npm run build
 ```
 
+The build first compiles the Rust engine to WebAssembly with
+`wasm-pack` (`npm run build:wasm`), then runs the Vite production
+build. If `wasm-pack` is not installed, the WASM step is skipped and
+the application automatically falls back to the JavaScript engine.
+
 The production build is output to `dist/` and is fully static, making it
 directly deployable to GitHub Pages.
+
+## Rust / WASM engine
+
+The high-performance engine lives in `rust-engine/` and is compiled with
+[`wasm-pack`](https://rustwasm.github.io/wasm-pack/):
+
+```bash
+cd rust-engine
+cargo test
+cd ..
+npm run build:wasm
+```
+
+This produces `src/wasm/pkg/`, which is loaded dynamically at runtime
+and is not committed to the repository; it is rebuilt on every install
+and on every CI deployment.
 
 ## License
 

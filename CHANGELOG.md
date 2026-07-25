@@ -5,6 +5,27 @@ All notable changes to GLConverter are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-07-25
+
+### Added
+
+- Rust engine compiled to WebAssembly, providing a high-performance
+  implementation of the whitespace-compaction pass and lexical token
+  counting used by the minified output and status bar.
+- Transparent engine bridge: the application attempts to load the
+  compiled WASM engine on startup and automatically falls back to the
+  existing JavaScript implementation when the WASM module has not been
+  built or fails to load, with no change in behavior or output for the
+  end user.
+- "Engine" badge in the header indicating whether the active engine is
+  WASM or the JS fallback.
+- Integrated performance benchmark panel comparing the JS and WASM
+  engines on the current source across a fixed number of iterations,
+  with per-task timing bars and a computed speedup factor.
+- `npm run build:wasm` script compiling the Rust engine with
+  `wasm-pack`, wired into the production build and into the GitHub
+  Actions deployment workflow.
+
 ## [0.5.0] - 2026-07-25
 
 ### Added

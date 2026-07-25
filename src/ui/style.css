@@ -90,6 +90,105 @@ body {
   white-space: nowrap;
 }
 
+#engine-badge {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.benchmark-widget {
+  position: relative;
+}
+
+.benchmark-panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 280px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.75rem 0.85rem;
+  box-shadow: 0 8px 24px rgba(24, 24, 27, 0.1);
+}
+
+.benchmark-panel-title {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.benchmark-panel-status {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+.benchmark-task {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.benchmark-task-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.benchmark-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.benchmark-bar-name {
+  width: 42px;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  color: var(--color-text-secondary);
+}
+
+.benchmark-bar-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: #f4f4f5;
+  overflow: hidden;
+}
+
+.benchmark-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--color-accent);
+}
+
+.benchmark-bar-value {
+  width: 70px;
+  flex-shrink: 0;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  color: var(--color-text-secondary);
+}
+
+.benchmark-speedup {
+  font-size: 0.72rem;
+  color: var(--color-text-secondary);
+}
+
 #status-bar {
   display: flex;
   gap: 0.75rem;
