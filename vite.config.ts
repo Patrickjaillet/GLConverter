@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   base: "./",
@@ -7,5 +7,11 @@ export default defineConfig({
     assetsDir: "assets",
     target: "es2022",
     sourcemap: false
+  },
+  test: {
+    environment: "jsdom",
+    globals: false,
+    include: ["src/**/*.test.ts"],
+    restoreMocks: true
   }
 });

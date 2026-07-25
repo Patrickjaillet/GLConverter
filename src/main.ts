@@ -46,10 +46,11 @@ const engineLabels: Record<ActiveEngine, string> = {
   [ActiveEngine.Js]: "Engine: JS (fallback)"
 };
 
-class Application {
+export class Application {
   private readonly conversionEngine: ConversionEngine;
   private originalPane: EditorPane | null;
   private convertedPane: EditorPane | null;
+  private backgroundScene: BackgroundScene | null;
   private isSyncing: boolean;
   private currentMode: ConversionMode;
   private currentDirection: ConversionDirection;
@@ -61,6 +62,7 @@ class Application {
     this.conversionEngine = new ConversionEngine();
     this.originalPane = null;
     this.convertedPane = null;
+    this.backgroundScene = null;
     this.isSyncing = false;
     this.currentMode = ConversionMode.Minified;
     this.currentDirection = ConversionDirection.Golf;
@@ -82,6 +84,7 @@ class Application {
     this.mountEditingControls();
     this.mountImportControls();
     this.mountExportAndCopyControls();
+    this.mountKeyboardShortcuts();
     this.updateDirectionVisibility();
 
     const result = this.conversionEngine.convert(sampleSource, this.currentMode, this.rules, this.currentDirection);
@@ -103,8 +106,8 @@ class Application {
       return;
     }
 
-    const backgroundScene = new BackgroundScene(canvas);
-    backgroundScene.start();
+    this.backgroundScene = new BackgroundScene(canvas);
+    this.backgroundScene.start();
   }
 
   private mountEditors(): void {
@@ -448,6 +451,83 @@ class Application {
     });
   }
 
+  private getTogglePanelPairs(): Array<{ toggle: HTMLElement | null; panel: HTMLElement | null }> {
+    return [
+      { toggle: document.getElementById("history-toggle"), panel: document.getElementById("history-panel") },
+      { toggle: document.getElementById("benchmark-toggle"), panel: document.getElementById("benchmark-panel") },
+      { toggle: document.getElementById("export-toggle"), panel: document.getElementById("export-panel") },
+      { toggle: document.getElementById("rules-toggle"), panel: document.getElementById("rules-panel") }
+    ];
+  }
+
+  private closeAllPanels(): void {
+    for (const { panel } of this.getTogglePanelPairs()) {
+      if (panel !== null) {
+        panel.hidden = true;
+      }
+    }
+  }
+
+  private mountKeyboardShortcuts(): void {
+    for (const { toggle, panel } of this.getTogglePanelPairs()) {
+      if (toggle !== null && panel !== null) {
+        toggle.setAttribute("aria-expanded", "false");
+
+        const observer = new MutationObserver(() => {
+          toggle.setAttribute("aria-expanded", panel.hidden ? "false" : "true");
+        });
+        observer.observe(panel, { attributes: true, attributeFilter: ["hidden"] });
+      }
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        this.closeAllPanels();
+        return;
+      }
+
+      if (!event.altKey || event.ctrlKey || event.metaKey) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+
+      if (key === "g") {
+        event.preventDefault();
+        const directionToggle = document.getElementById("direction-toggle") as HTMLButtonElement | null;
+
+        if (directionToggle !== null) {
+          this.handleDirectionToggle(directionToggle);
+        }
+      } else if (key === "m") {
+        event.preventDefault();
+        const modeToggle = document.getElementById("mode-toggle") as HTMLButtonElement | null;
+
+        if (modeToggle !== null && !modeToggle.hidden) {
+          this.handleModeToggle(modeToggle);
+        }
+      } else if (key === "c") {
+        event.preventDefault();
+        document.getElementById("copy-toggle")?.dispatchEvent(new MouseEvent("click"));
+      } else if (key === "e") {
+        event.preventDefault();
+        document.getElementById("export-toggle")?.dispatchEvent(new MouseEvent("click"));
+      } else if (key === "h") {
+        event.preventDefault();
+        document.getElementById("history-toggle")?.dispatchEvent(new MouseEvent("click"));
+      } else if (key === "b") {
+        event.preventDefault();
+        document.getElementById("benchmark-toggle")?.dispatchEvent(new MouseEvent("click"));
+      } else if (key === "r") {
+        event.preventDefault();
+        document.getElementById("rules-toggle")?.dispatchEvent(new MouseEvent("click"));
+      } else if (key === "i") {
+        event.preventDefault();
+        document.getElementById("import-toggle")?.dispatchEvent(new MouseEvent("click"));
+      }
+    });
+  }
+
   private mountHistoryPanel(): void {
     const toggleButton = document.getElementById("history-toggle") as HTMLButtonElement | null;
     const panel = document.getElementById("history-panel");
@@ -576,12 +656,14 @@ class Application {
   private renderConverted(content: string): ConversionResult {
     const result = this.conversionEngine.convert(content, this.currentMode, this.rules, this.currentDirection);
     this.convertedPane?.setContent(result.code);
+    this.backgroundScene?.pulse();
     return result;
   }
 
   public dispose(): void {
     this.originalPane?.destroy();
     this.convertedPane?.destroy();
+    this.backgroundScene?.dispose();
   }
 
   private refreshStatus(content: string, result: ConversionResult): void {

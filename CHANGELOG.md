@@ -5,6 +5,32 @@ All notable changes to GLConverter are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-07-25
+
+### Added
+
+- Global keyboard shortcuts, active anywhere in the application:
+  `Alt+G` toggles Golf / De-golf, `Alt+M` toggles Minified / Justified,
+  `Alt+C` copies the converted code, `Alt+E` opens Export, `Alt+H`
+  opens History, `Alt+B` opens Benchmark, `Alt+R` opens Rules, `Alt+I`
+  opens Import, and `Escape` closes any open panel. Every corresponding
+  button now shows its shortcut in a tooltip.
+- Keyboard-visible focus outline applied consistently across every
+  interactive element, and `aria-expanded` / `aria-haspopup` states
+  kept in sync on all dropdown-style panels for assistive technology.
+- Reactive Three.js background transition: the point-field background
+  now animates a brief pulse (speed, size, and opacity) on every
+  conversion, and respects the operating system's reduced-motion
+  preference by disabling the animation entirely when requested.
+
+### Changed
+
+- Refined responsive breakpoints for tablet and mobile viewports: the
+  header and its controls now wrap cleanly, dropdown panels
+  (History, Benchmark, Export, Rules) constrain themselves to the
+  viewport width instead of overflowing on narrow screens, and the
+  status bar and header actions reflow on small screens.
+
 ## [0.7.0] - 2026-07-25
 
 ### Added

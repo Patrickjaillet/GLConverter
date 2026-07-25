@@ -16,20 +16,20 @@
             <p id="subtitle">Code golfing and structured code converter</p>
           </div>
           <div id="header-controls">
-            <button id="direction-toggle" class="mode-toggle" type="button">Golf</button>
+            <button id="direction-toggle" class="mode-toggle" type="button" title="Toggle Golf / De-golf (Alt+G)">Golf</button>
             <div class="history-widget">
-              <button id="history-toggle" class="mode-toggle" type="button">History</button>
-              <div id="history-panel" class="history-panel" hidden></div>
+              <button id="history-toggle" class="mode-toggle" type="button" aria-haspopup="true" title="Conversion history (Alt+H)">History</button>
+              <div id="history-panel" class="history-panel" role="menu" hidden></div>
             </div>
             <div class="benchmark-widget">
-              <button id="benchmark-toggle" class="mode-toggle" type="button">Benchmark</button>
-              <div id="benchmark-panel" class="benchmark-panel" hidden></div>
+              <button id="benchmark-toggle" class="mode-toggle" type="button" aria-haspopup="true" title="Engine benchmark (Alt+B)">Benchmark</button>
+              <div id="benchmark-panel" class="benchmark-panel" role="menu" hidden></div>
             </div>
             <span id="engine-badge">Engine: —</span>
-            <span id="version-badge">v0.7.0</span>
+            <span id="version-badge">v0.8.0</span>
           </div>
         </header>
-        <section id="status-bar">
+        <section id="status-bar" aria-live="polite">
           <span id="language-badge">Language: —</span>
           <span id="token-badge">Tokens: —</span>
           <span id="length-badge">Characters: —</span>
@@ -41,9 +41,9 @@
             <div class="editor-panel-header">
               <span>Original</span>
               <div class="header-actions">
-                <button id="undo-toggle" class="mode-toggle" type="button">Undo</button>
-                <button id="redo-toggle" class="mode-toggle" type="button">Redo</button>
-                <button id="import-toggle" class="mode-toggle" type="button">Import</button>
+                <button id="undo-toggle" class="mode-toggle" type="button" title="Undo (Ctrl+Z)">Undo</button>
+                <button id="redo-toggle" class="mode-toggle" type="button" title="Redo (Ctrl+Y)">Redo</button>
+                <button id="import-toggle" class="mode-toggle" type="button" title="Import a file (Alt+I)">Import</button>
                 <input id="import-input" class="visually-hidden" type="file" accept=".js,.txt,text/javascript,text/plain" />
               </div>
             </div>
@@ -53,19 +53,19 @@
             <div class="editor-panel-header">
               <span>Converted</span>
               <div class="header-actions">
-                <button id="copy-toggle" class="mode-toggle" type="button">Copy</button>
+                <button id="copy-toggle" class="mode-toggle" type="button" title="Copy converted code (Alt+C)">Copy</button>
                 <div class="export-widget">
-                  <button id="export-toggle" class="mode-toggle" type="button">Export</button>
-                  <div id="export-panel" class="export-panel" hidden>
+                  <button id="export-toggle" class="mode-toggle" type="button" aria-haspopup="true" title="Export converted code (Alt+E)">Export</button>
+                  <div id="export-panel" class="export-panel" role="menu" hidden>
                     <button id="export-js" class="export-panel-item" type="button">.js file</button>
                     <button id="export-txt" class="export-panel-item" type="button">.txt file</button>
                   </div>
                 </div>
                 <div class="rules-widget">
-                  <button id="rules-toggle" class="mode-toggle" type="button">Rules</button>
-                  <div id="rules-panel" class="rules-panel" hidden></div>
+                  <button id="rules-toggle" class="mode-toggle" type="button" aria-haspopup="true" title="Golfing rules (Alt+R)">Rules</button>
+                  <div id="rules-panel" class="rules-panel" role="menu" hidden></div>
                 </div>
-                <button id="mode-toggle" class="mode-toggle" type="button">Minified</button>
+                <button id="mode-toggle" class="mode-toggle" type="button" title="Toggle Minified / Justified (Alt+M)">Minified</button>
               </div>
             </div>
             <div id="editor-converted" class="editor-mount"></div>

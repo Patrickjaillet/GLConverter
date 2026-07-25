@@ -11,10 +11,24 @@ automatically between the two views.
 
 ## Status
 
-Version `0.7.0` — local file import (drag & drop or file picker),
-export of the converted code as `.js` or `.txt`, one-click clipboard
-copy, a session-local conversion history panel, and Undo / Redo
-controls for the original editor. See `CHANGELOG.md` for details.
+Version `0.8.0` — finalized responsive white-theme interface, a
+reactive Three.js background transition, and global keyboard
+shortcuts with full focus and `aria` state support. See
+`CHANGELOG.md` for details.
+
+### Keyboard shortcuts
+
+| Shortcut | Action |
+| --- | --- |
+| `Alt+G` | Toggle Golf / De-golf |
+| `Alt+M` | Toggle Minified / Justified |
+| `Alt+C` | Copy the converted code |
+| `Alt+E` | Open the Export menu |
+| `Alt+H` | Open the History panel |
+| `Alt+B` | Open the Benchmark panel |
+| `Alt+R` | Open the Rules panel |
+| `Alt+I` | Open the Import file picker |
+| `Escape` | Close any open panel |
 
 ## Development
 
