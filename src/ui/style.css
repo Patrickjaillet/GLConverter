@@ -119,6 +119,10 @@ body {
   position: relative;
 }
 
+.benchmark-panel[hidden] {
+  display: none;
+}
+
 .benchmark-panel {
   position: absolute;
   top: calc(100% + 0.4rem);
@@ -226,6 +230,10 @@ body {
   position: relative;
 }
 
+.export-panel[hidden] {
+  display: none;
+}
+
 .export-panel {
   position: absolute;
   top: calc(100% + 0.4rem);
@@ -261,6 +269,10 @@ body {
 
 .history-widget {
   position: relative;
+}
+
+.history-panel[hidden] {
+  display: none;
 }
 
 .history-panel {
@@ -378,6 +390,10 @@ body {
 
 .rules-widget {
   position: relative;
+}
+
+.rules-panel[hidden] {
+  display: none;
 }
 
 .rules-panel {
