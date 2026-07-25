@@ -11,10 +11,12 @@ automatically between the two views.
 
 ## Status
 
-Version `0.8.0` — finalized responsive white-theme interface, a
-reactive Three.js background transition, and global keyboard
-shortcuts with full focus and `aria` state support. See
-`CHANGELOG.md` for details.
+Version `1.0.0` — first stable release. Structured-to-golfed and
+golfed-to-structured conversion, a configurable golfing rules engine,
+a Rust/WebAssembly engine with automatic JavaScript fallback and an
+integrated benchmark, file import/export, session history with
+undo/redo, a fully responsive white-theme interface, and a complete
+automated test suite. See `CHANGELOG.md` for the full history.
 
 ### Keyboard shortcuts
 

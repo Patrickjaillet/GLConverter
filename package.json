@@ -1,6 +1,6 @@
 {
   "name": "glconverter",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Code golfing to structured code converter, and vice versa",
