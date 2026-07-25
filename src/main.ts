@@ -1,4 +1,4 @@
-import { BackgroundScene } from "./ui/BackgroundScene";
+import type { BackgroundScene } from "./ui/BackgroundScene";
 import { EditorPane } from "./ui/EditorPane";
 import {
   ConversionEngine,
@@ -11,7 +11,7 @@ import { detectLanguage } from "./core/LanguageDetector";
 import { parseSource } from "./core/Parser";
 import { defaultGolfRules, golfRuleDescriptors, type GolfRules } from "./core/transform/GolfRules";
 import { engineManager, ActiveEngine } from "./core/EngineManager";
-import { runBenchmark, type BenchmarkReport } from "./core/Benchmark";
+import type { BenchmarkReport } from "./core/Benchmark";
 import { HistoryStore, type HistoryEntry } from "./core/HistoryStore";
 import { readFileAsText, downloadTextFile, copyToClipboard } from "./ui/FileTransfer";
 
@@ -106,8 +106,10 @@ export class Application {
       return;
     }
 
-    this.backgroundScene = new BackgroundScene(canvas);
-    this.backgroundScene.start();
+    void import("./ui/BackgroundScene").then(({ BackgroundScene }) => {
+      this.backgroundScene = new BackgroundScene(canvas);
+      this.backgroundScene.start();
+    });
   }
 
   private mountEditors(): void {
@@ -277,15 +279,18 @@ export class Application {
     panel.appendChild(status);
 
     const content = this.originalPane?.getContent() ?? sampleSource;
-    const report = runBenchmark(content);
 
-    status.textContent = report.wasmAvailable
-      ? `Active engine: WASM \u2014 ${report.iterations} iterations`
-      : `Active engine: JS fallback (WASM not built) \u2014 ${report.iterations} iterations`;
+    void import("./core/Benchmark").then(({ runBenchmark }) => {
+      const report = runBenchmark(content);
 
-    for (const task of report.tasks) {
-      panel.appendChild(this.buildBenchmarkTaskElement(task));
-    }
+      status.textContent = report.wasmAvailable
+        ? `Active engine: WASM \u2014 ${report.iterations} iterations`
+        : `Active engine: JS fallback (WASM not built) \u2014 ${report.iterations} iterations`;
+
+      for (const task of report.tasks) {
+        panel.appendChild(this.buildBenchmarkTaskElement(task));
+      }
+    });
   }
 
   private buildBenchmarkTaskElement(task: BenchmarkReport["tasks"][number]): HTMLElement {

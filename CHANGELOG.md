@@ -5,6 +5,36 @@ All notable changes to GLConverter are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-07-25
+
+### Added
+
+- Full automated test suite (Vitest): unit tests for every golfing
+  technique (dead code elimination, declaration merging, loop golfing,
+  ternary/`&&` conditional golfing, native call shortcuts, variable
+  renaming, operator simplification), unit tests for every de-golfing
+  technique (conditional expansion, loop expansion, operator expansion,
+  block normalization, descriptive renaming), unit tests for the
+  equivalence validator, the parser, the language detector, the
+  session history store, and the JS/WASM engine bridge, and interface
+  integration tests exercising the mounted application (mode and
+  direction toggles, rules panel, keyboard shortcuts, engine badge).
+- GitHub Pages compatibility verification script (`npm run
+  verify:pages`), run automatically at the end of every production
+  build, checking that every emitted asset reference is relative.
+- `npm test` now runs before the build step in the GitHub Actions
+  deployment workflow.
+
+### Changed
+
+- The Three.js background scene and the engine benchmark module are
+  now loaded on demand via dynamic `import()` instead of being bundled
+  into the application's initial entry chunk.
+- Production build output is now split into cacheable vendor chunks
+  (Three.js, CodeMirror, the AST/golfing engine) instead of a single
+  monolithic bundle, reducing the initial entry chunk from roughly
+  1 MB to about 36 kB and removing the Vite large-chunk warning.
+
 ## [0.8.0] - 2026-07-25
 
 ### Added
