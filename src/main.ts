@@ -73,6 +73,7 @@ export class Application {
 
   public async mount(): Promise<void> {
     this.mountBackground();
+    this.updateVersionBadge();
     await engineManager.initialize();
     this.updateEngineBadge();
     this.mountEditors();
@@ -89,6 +90,14 @@ export class Application {
 
     const result = this.conversionEngine.convert(sampleSource, this.currentMode, this.rules, this.currentDirection);
     this.refreshStatus(sampleSource, result);
+  }
+
+  private updateVersionBadge(): void {
+    const versionBadge = document.getElementById("version-badge");
+
+    if (versionBadge !== null) {
+      versionBadge.textContent = `v${__APP_VERSION__}`;
+    }
   }
 
   private updateEngineBadge(): void {

@@ -5,6 +5,19 @@ All notable changes to GLConverter are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-07-25
+
+### Added
+
+- Compiled Rust/WebAssembly engine bundled and loaded at runtime
+  (`src/wasm/pkg/`), giving the application its high-performance
+  engine in production instead of the JS fallback.
+
+### Fixed
+
+- Header version badge now reflects the actual `package.json` version
+  at build time instead of a hardcoded string in `index.html`.
+
 ## [1.0.0] - 2026-07-25
 
 ### Added

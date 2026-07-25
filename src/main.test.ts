@@ -25,7 +25,7 @@ async function mountApp(): Promise<InstanceType<typeof import("./main").Applicat
               <div id="benchmark-panel" class="benchmark-panel" role="menu" hidden></div>
             </div>
             <span id="engine-badge">Engine: —</span>
-            <span id="version-badge">v0.9.0</span>
+            <span id="version-badge"></span>
           </div>
         </header>
         <section id="status-bar" aria-live="polite">
@@ -102,6 +102,9 @@ describe("Application (UI integration)", () => {
 
     const engineBadge = document.getElementById("engine-badge");
     expect(engineBadge?.textContent).toBe("Engine: JS (fallback)");
+
+    const versionBadge = document.getElementById("version-badge");
+    expect(versionBadge?.textContent).toMatch(/^v\d+\.\d+\.\d+$/);
   });
 
   it("toggles between Minified and Justified modes and updates the button label", async () => {

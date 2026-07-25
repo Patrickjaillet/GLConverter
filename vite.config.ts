@@ -1,7 +1,15 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+
+const packageJsonUrl = new URL("./package.json", import.meta.url);
+const packageJson = JSON.parse(readFileSync(fileURLToPath(packageJsonUrl), "utf-8")) as { version: string };
 
 export default defineConfig({
   base: "./",
+  define: {
+    __APP_VERSION__: JSON.stringify(packageJson.version)
+  },
   build: {
     outDir: "dist",
     assetsDir: "assets",
